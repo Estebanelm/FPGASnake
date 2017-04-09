@@ -33,37 +33,15 @@ module maquina_estados(
 	reg obtener = 0;
 	wire [2:0] memoria; //registro con la siguiente instruccion para la maquina de estados
 
-	reg [26:0] contador_ciclos = 0;
-	//integer memoria_input;
-	//wire [3:0] boton_pres1;
 	wire [2:0] boton_pres; //entradas donde se guardan todos los botones de los pisos
 	//accion //0: nada, 1: arriba, 2: abajo, 3: izquierda, 4: derecha
-	reg [3:0] contador_seg = 0;
 		
-	
-	
 	//assign boton_pres1 = boton_pres;
 	
 	reg LE = 1;
-	
-	reg [1:0] doscicloclk = 0;
-
-/*
-	initial 
-		begin
-			accion = 0;
-			contador_seg = 0;
-			//memoria_m = 0;
-		end
-	*/
-	
-	//Frecuencias de 1kHz y otras
-	//(* keep="soft" *)
-	//wire CLK_1Hz;
-	//(* keep="soft" *)
-	//wire CLK_2Hz;
-	//wire CLK_1KHz;
-	////frequency_divider divisor (CLK_1Hz, CLK_2Hz, CLK_1KHz, clk);
+	reg mover = 0;
+	reg [30:0] clk_counter = 0;
+	reg clk_reduced = 0;
 
 	reg clk_50mhz = 0;
 	wire hsync_out;
@@ -79,7 +57,7 @@ module maquina_estados(
 	
 	assign hsync = ~hsync_out;
 	assign vsync = ~vsync_out;
-	/*
+	
 	manejo_entradas entradas(
 	clk,
 	arriba,
@@ -89,7 +67,7 @@ module maquina_estados(
 	pausa,
 	boton_pres
     );
-	 */
+	 
 	manejo_memoria memoria_movimiento(
    clk,
 	rst,
@@ -97,12 +75,8 @@ module maquina_estados(
 	boton_pres, //boton que se presiona
 	memoria //registro con la siguiente instruccion para la maquina de estados
     );
-	 /*
-	 clock50M clockde50MHz(
-	 clk,
-	 clk_50mhz
-	 );
-	 */
+	 
+	 
 	 vga_800x600 controlador(
 	 .clk(clk_50mhz),
 	 .clr(rst),
@@ -110,10 +84,14 @@ module maquina_estados(
 	 .vsync(vsync_out),
 	 .PixelX(PixelX),
 	 .PixelY(PixelY),
-	 .vidon(vidon));
+	 .vidon(vidon)
+	 );
 	 
+	
 	 GameLogic pintador(
 	 clk,
+	 clk_reduced,
+	 mover,
 	 PixelX,
 	 PixelY,
 	 rst,
@@ -127,30 +105,55 @@ module maquina_estados(
 	 );
 	 
 	 
+	 initial
+	 begin
+		RED[2:0] = 3'b000;
+		GREEN[2:0] = 3'b000;
+		BLUE[1:0] = 2'b00;
+	 end
+	 
 	 always @(posedge clk)
 	 begin
 			clk_50mhz = ~clk_50mhz;
 	 end
 	 
-	 always @(posedge clk_50mhz)
-	 begin
-		
-		if (vidon)
+	 
+	/* ===============================================================================
+	 *                          Reduced clock for movement
+	 * =============================================================================== */
+	 
+	
+	/*
+	always @(posedge clk)
+	begin
+		clk_counter = clk_counter + 1;
+		if (clk_counter == 2000000)
 		begin
+			clk_counter = 0;
+			clk_reduced = ~clk_reduced;		
+		end
+	
+	end
+
+	*/ 
+	always @(posedge clk_50mhz)
+	 begin
+		if (vidon)
+			begin
 			
 				RED[2:0] = RObtenido;
 				GREEN[2:0] = GObtenido;
 				BLUE[1:0] = BObtenido;
 		
-		end
+			end
 		else
-		begin
+			begin
 			
 			RED[2:0] = 3'b000;
 			GREEN[2:0] = 3'b000;
 			BLUE[1:0] = 2'b00;
 		
-		end
+			end
 		
 		
 	 end
@@ -158,25 +161,24 @@ module maquina_estados(
 	
 	always @ (posedge clk)
 	   begin
-			if(rst)
+			if(rst == 1)
 			   begin
 				   e_actual = Inicio;
 					LE = 1;
-					contador_seg = 4'b0;
 				end
 			else			
 				begin
 					//memoria_m = memoria;
+					mover = 0;
 					LE = 1;
-					if (contador_ciclos == 100000000)
+					clk_counter = clk_counter + 1;
+					if (clk_counter >= 2000000)
 						begin
-							contador_seg = contador_seg + 4'b0001;
-						end
-					else if (contador_seg == 2)
-						begin
-							contador_seg = 4'b0;
+							e_actual = e_siguiente;
+							mover = 1;
+							clk_counter = 0;
+							clk_reduced = ~clk_reduced;
 						   LE = 0;
-							#200;
 							case(e_actual)
 							
 				//************ Estado: Piso 1*****************//
@@ -385,8 +387,7 @@ module maquina_estados(
 				//************ Estado: Defecto*****************//					
 								default: e_siguiente=Inicio;//por defecto está en el piso 1
 							endcase
-							e_actual = e_siguiente;
-							
+
 						end
 				end
 		end

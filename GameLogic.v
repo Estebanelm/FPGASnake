@@ -1,12 +1,15 @@
 
 module GameLogic(input uclk,
+							 input clk_reduced,
+							 input mover,
 							 input [10:0] PixelX,
 							 input [10:0] PixelY,
 							 input reset,
 							 input BtnLeft,
 							 input BtnRight,
 							 input BtnTop,
-							 input BtnBottom,							 
+							 input BtnBottom,
+							 input [2:0] accion,
 							 output reg [2:0] R,
 							 output reg [2:0] G,
 							 output reg [1:0] B
@@ -35,8 +38,6 @@ module GameLogic(input uclk,
 	initial begin
 			UserCurrentPositionX = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
 			UserCurrentPositionY = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
-	
-			clk_reduced = 1;
 	end
 	
 	
@@ -44,8 +45,8 @@ module GameLogic(input uclk,
 	 *                                Position variables
 	 * =============================================================================== */
 	
-	reg signed [11:0] UserCurrentPositionX;
-	reg signed [11:0] UserCurrentPositionY;		
+	reg [11:0] UserCurrentPositionX;
+	reg [11:0] UserCurrentPositionY;		
 	
 	/* ===============================================================================
 	 *                                Collision Detection
@@ -72,36 +73,18 @@ module GameLogic(input uclk,
 													   CollisionDetect_YBottom_G == 3'b000 &&
 													   CollisionDetect_YBottom_B == 2'b00);
 	*/														
-		
-	/* ===============================================================================
-	 *                          Reduced clock for movement
-	 * =============================================================================== */
-	 
-	reg [30:0] clk_counter = 0;
-	reg clk_reduced;
-	
-	always @(posedge uclk)
-	begin
-		clk_counter = clk_counter + 1;
-		if (clk_counter == 2000000)
-		begin
-			clk_counter = 0;
-			clk_reduced = ~clk_reduced;		
-		end
-	
-	end
-	
+			
 	
 	/* ===============================================================================
 	 *                                  Game logic
 	 * =============================================================================== */
 	
 	
-	always @(posedge clk_reduced)
+	always @(posedge mover)
 	begin
 	
 	
-		if (reset == 1)
+		if (reset)
 		begin
 			UserCurrentPositionX = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
 			UserCurrentPositionY = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
@@ -109,23 +92,23 @@ module GameLogic(input uclk,
 		else
 		begin
 			
-				if (BtnBottom == 1 && (UserCurrentPositionX + PLAYER_BOX_WIDTH_HALF) <= 599) begin
-					UserCurrentPositionY = $signed(UserCurrentPositionY) + PLAYER_BOX_WIDTH;
+				if (accion == 2 && (UserCurrentPositionY + PLAYER_BOX_WIDTH_HALF) <= 599) begin
+					UserCurrentPositionY = UserCurrentPositionY + PLAYER_BOX_WIDTH;
 				end
 				
-				if (BtnTop == 1 && (UserCurrentPositionY - PLAYER_BOX_WIDTH_HALF) >= 1) begin
-					UserCurrentPositionY = $signed(UserCurrentPositionY) - PLAYER_BOX_WIDTH;
+				if (accion == 1 && (UserCurrentPositionY - PLAYER_BOX_WIDTH_HALF) >= 1) begin
+					UserCurrentPositionY = UserCurrentPositionY - PLAYER_BOX_WIDTH;
 				end
 				
-				if (BtnRight == 1 && (UserCurrentPositionX + PLAYER_BOX_WIDTH_HALF) <= 799) begin
-					UserCurrentPositionX = $signed(UserCurrentPositionX) + PLAYER_BOX_WIDTH;
+				if (accion == 4 && (UserCurrentPositionX + PLAYER_BOX_WIDTH_HALF) <= 799) begin
+					UserCurrentPositionX = UserCurrentPositionX + PLAYER_BOX_WIDTH;
 				end
 				
-				if (BtnLeft == 1 && (UserCurrentPositionX - PLAYER_BOX_WIDTH_HALF) >= 1) begin
-					UserCurrentPositionX = $signed(UserCurrentPositionX) - PLAYER_BOX_WIDTH;
+				if (accion == 3 && (UserCurrentPositionX - PLAYER_BOX_WIDTH_HALF) >= 1) begin
+					UserCurrentPositionX = UserCurrentPositionX - PLAYER_BOX_WIDTH;
 				end
-				
-			/*
+				/*
+			
 				if ($signed(UserCurrentPositionY) < $signed(0)) begin
 						UserCurrentPositionY = $signed(0);
 				end
@@ -149,7 +132,7 @@ module GameLogic(input uclk,
 	 *                          Graphics output 
 	 * =============================================================================== */
 	
-	always @(clk_reduced)
+	always @(posedge uclk)
 	begin
 		
 		if (PixelX >= (UserCurrentPositionX - PLAYER_BOX_WIDTH_HALF) &&
@@ -168,18 +151,7 @@ module GameLogic(input uclk,
 			B[1:0] = 2'b11;
 		end
 		
-	end	
-
-
-	/* ===============================================================================
-	 *                               Module instantiations
-	 * =============================================================================== */
-	 
-	 /*defparam isHeldFor4Seconds.SECONDS = 4;
-	 IsHeldForXSeconds isHeldFor4Seconds(.uclk(uclk),
-													 .reset(1'b0),
-													 .btn(reset),
-													 .val(reset_held_for_more_than_4_sec));*/												
+	end											
 	
 
 endmodule
