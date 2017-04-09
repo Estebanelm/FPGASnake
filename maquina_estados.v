@@ -15,8 +15,15 @@ module maquina_estados(
 	 input izquierda,
 	 input derecha,
 	 input pausa,
-	 output reg [2:0] accion
+	 output hsync,
+	 output vsync,
+	 output reg [2:0] RED,
+	 output reg [2:0] GREEN,
+	 output reg [1:0] BLUE
 	 );
+
+
+	reg [2:0] accion; ///salida de la máquina de estados, dice lo que tiene que hacer el cuadro
 
 	parameter Inicio=0, MArr=1, MAba=2, MIzq=3, MDer=4, PArr=5, PAba=6, PDer=7, PIzq= 8; //Estados
 	
@@ -38,23 +45,41 @@ module maquina_estados(
 	//assign boton_pres1 = boton_pres;
 	
 	reg LE = 1;
+	
+	reg [1:0] doscicloclk = 0;
 
+/*
 	initial 
 		begin
 			accion = 0;
 			contador_seg = 0;
 			//memoria_m = 0;
 		end
-	
+	*/
 	
 	//Frecuencias de 1kHz y otras
-	(* keep="soft" *)
-	wire CLK_1Hz;
-	(* keep="soft" *)
-	wire CLK_2Hz;
-	wire CLK_1KHz;
-	frequency_divider divisor (CLK_1Hz, CLK_2Hz, CLK_1KHz, clk);
+	//(* keep="soft" *)
+	//wire CLK_1Hz;
+	//(* keep="soft" *)
+	//wire CLK_2Hz;
+	//wire CLK_1KHz;
+	////frequency_divider divisor (CLK_1Hz, CLK_2Hz, CLK_1KHz, clk);
 
+	reg clk_50mhz = 0;
+	wire hsync_out;
+	wire vsync_out;
+	wire vidon;
+	
+	wire [10:0] PixelX;
+	wire [10:0] PixelY;
+	
+	wire [2:0] RObtenido;
+	wire [2:0] GObtenido;
+	wire [1:0] BObtenido;
+	
+	assign hsync = ~hsync_out;
+	assign vsync = ~vsync_out;
+	/*
 	manejo_entradas entradas(
 	clk,
 	arriba,
@@ -64,7 +89,7 @@ module maquina_estados(
 	pausa,
 	boton_pres
     );
-	 
+	 */
 	manejo_memoria memoria_movimiento(
    clk,
 	rst,
@@ -72,6 +97,64 @@ module maquina_estados(
 	boton_pres, //boton que se presiona
 	memoria //registro con la siguiente instruccion para la maquina de estados
     );
+	 /*
+	 clock50M clockde50MHz(
+	 clk,
+	 clk_50mhz
+	 );
+	 */
+	 vga_800x600 controlador(
+	 .clk(clk_50mhz),
+	 .clr(rst),
+	 .hsync(hsync_out),
+	 .vsync(vsync_out),
+	 .PixelX(PixelX),
+	 .PixelY(PixelY),
+	 .vidon(vidon));
+	 
+	 GameLogic pintador(
+	 clk,
+	 PixelX,
+	 PixelY,
+	 rst,
+	 izquierda,
+	 derecha,
+	 arriba,
+	 abajo,
+	 RObtenido,
+	 GObtenido,
+	 BObtenido
+	 );
+	 
+	 
+	 always @(posedge clk)
+	 begin
+			clk_50mhz = ~clk_50mhz;
+	 end
+	 
+	 always @(posedge clk_50mhz)
+	 begin
+		
+		if (vidon)
+		begin
+			
+				RED[2:0] = RObtenido;
+				GREEN[2:0] = GObtenido;
+				BLUE[1:0] = BObtenido;
+		
+		end
+		else
+		begin
+			
+			RED[2:0] = 3'b000;
+			GREEN[2:0] = 3'b000;
+			BLUE[1:0] = 2'b00;
+		
+		end
+		
+		
+	 end
+	 
 	
 	always @ (posedge clk)
 	   begin
