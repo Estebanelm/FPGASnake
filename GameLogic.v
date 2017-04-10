@@ -1,5 +1,6 @@
 
-module GameLogic(input uclk,
+module GameLogic(
+							 input uclk,
 							 input clk_reduced,
 							 input mover,
 							 input [10:0] PixelX,
@@ -24,6 +25,11 @@ module GameLogic(input uclk,
 	parameter INITIAL_START_POS_X 	= 40;
 	parameter INITIAL_START_POS_Y 	= 40;
 	
+	reg arriba;
+	reg abajo;
+	reg derecha;
+	reg izquierda;
+	
 	
 	/* ===============================================================================
 	 *                              Level selector
@@ -38,6 +44,10 @@ module GameLogic(input uclk,
 	initial begin
 			UserCurrentPositionX = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
 			UserCurrentPositionY = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
+			arriba = UserCurrentPositionY - PLAYER_BOX_WIDTH_HALF;
+			abajo = UserCurrentPositionY + PLAYER_BOX_WIDTH_HALF;
+			izquierda = UserCurrentPositionX - PLAYER_BOX_WIDTH_HALF;
+			derecha = UserCurrentPositionX + PLAYER_BOX_WIDTH_HALF;
 	end
 	
 	
@@ -46,7 +56,9 @@ module GameLogic(input uclk,
 	 * =============================================================================== */
 	
 	reg [11:0] UserCurrentPositionX;
-	reg [11:0] UserCurrentPositionY;		
+	reg [11:0] UserCurrentPositionY;
+	reg movido = 0;
+	
 	
 	/* ===============================================================================
 	 *                                Collision Detection
@@ -80,49 +92,60 @@ module GameLogic(input uclk,
 	 * =============================================================================== */
 	
 	
-	always @(posedge mover)
-	begin
-	
-	
-		if (reset)
+	always @(posedge uclk)
 		begin
-			UserCurrentPositionX = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
-			UserCurrentPositionY = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
-		end
+	
+	
+		if (reset == 1)
+			begin
+				UserCurrentPositionX = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
+				UserCurrentPositionY = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
+			end
 		else
-		begin
-			
-				if (accion == 2 && (UserCurrentPositionY + PLAYER_BOX_WIDTH_HALF) <= 599) begin
-					UserCurrentPositionY = UserCurrentPositionY + PLAYER_BOX_WIDTH;
-				end
+			begin
+				if (mover == 0) begin
+					movido = 1;
+				end else
+					if (movido == 1)
+						begin
+							movido = 0;
+							arriba = UserCurrentPositionY - PLAYER_BOX_WIDTH_HALF;
+							abajo = UserCurrentPositionY + PLAYER_BOX_WIDTH_HALF;
+							izquierda = UserCurrentPositionX - PLAYER_BOX_WIDTH_HALF;
+							derecha = UserCurrentPositionX + PLAYER_BOX_WIDTH_HALF;
 				
-				if (accion == 1 && (UserCurrentPositionY - PLAYER_BOX_WIDTH_HALF) >= 1) begin
-					UserCurrentPositionY = UserCurrentPositionY - PLAYER_BOX_WIDTH;
-				end
-				
-				if (accion == 4 && (UserCurrentPositionX + PLAYER_BOX_WIDTH_HALF) <= 799) begin
-					UserCurrentPositionX = UserCurrentPositionX + PLAYER_BOX_WIDTH;
-				end
-				
-				if (accion == 3 && (UserCurrentPositionX - PLAYER_BOX_WIDTH_HALF) >= 1) begin
-					UserCurrentPositionX = UserCurrentPositionX - PLAYER_BOX_WIDTH;
-				end
-				/*
-			
-				if ($signed(UserCurrentPositionY) < $signed(0)) begin
-						UserCurrentPositionY = $signed(0);
-				end
-				if ($signed(UserCurrentPositionY) > $signed(600)) begin
-						UserCurrentPositionY = $signed(600);
-				end
-				if ($signed(UserCurrentPositionX) < $signed(0)) begin
-						UserCurrentPositionX = $signed(0);
-				end
-				if ($signed(UserCurrentPositionX) > $signed(800)) begin
-						UserCurrentPositionX = $signed(800);
-				end
-				*/
-		end
+							if (accion == 2 && abajo <= 599) begin
+								UserCurrentPositionY = UserCurrentPositionY + PLAYER_BOX_WIDTH;
+							end
+							
+							if (accion == 1 && arriba >= 1) begin
+								UserCurrentPositionY = UserCurrentPositionY - PLAYER_BOX_WIDTH;
+							end
+							
+							if (accion == 4 && derecha <= 799) begin
+								UserCurrentPositionX = UserCurrentPositionX + PLAYER_BOX_WIDTH;
+							end
+							
+							if (accion == 3 && izquierda >= 1) begin
+								UserCurrentPositionX = UserCurrentPositionX - PLAYER_BOX_WIDTH;
+							end
+							/*
+						
+							if ($signed(UserCurrentPositionY) < $signed(0)) begin
+									UserCurrentPositionY = $signed(0);
+							end
+							if ($signed(UserCurrentPositionY) > $signed(600)) begin
+									UserCurrentPositionY = $signed(600);
+							end
+							if ($signed(UserCurrentPositionX) < $signed(0)) begin
+									UserCurrentPositionX = $signed(0);
+							end
+							if ($signed(UserCurrentPositionX) > $signed(800)) begin
+									UserCurrentPositionX = $signed(800);
+							end
+							*/
+						end
+			end
 	
 	
 	end

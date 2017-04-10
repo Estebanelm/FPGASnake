@@ -23,7 +23,7 @@ module maquina_estados(
 	 );
 
 
-	reg [2:0] accion; ///salida de la m·quina de estados, dice lo que tiene que hacer el cuadro
+	reg [2:0] accion = 0; ///salida de la m·quina de estados, dice lo que tiene que hacer el cuadro
 
 	parameter Inicio=0, MArr=1, MAba=2, MIzq=3, MDer=4, PArr=5, PAba=6, PDer=7, PIzq= 8; //Estados
 	
@@ -40,7 +40,8 @@ module maquina_estados(
 	
 	reg LE = 1;
 	reg mover = 0;
-	reg [30:0] clk_counter = 0;
+	reg cambiarestado = 0;
+	reg [20:0] clk_counter = 21'b0;
 	reg clk_reduced = 0;
 
 	reg clk_50mhz = 0;
@@ -99,6 +100,7 @@ module maquina_estados(
 	 derecha,
 	 arriba,
 	 abajo,
+	 accion,
 	 RObtenido,
 	 GObtenido,
 	 BObtenido
@@ -112,51 +114,7 @@ module maquina_estados(
 		BLUE[1:0] = 2'b00;
 	 end
 	 
-	 always @(posedge clk)
-	 begin
-			clk_50mhz = ~clk_50mhz;
-	 end
 	 
-	 
-	/* ===============================================================================
-	 *                          Reduced clock for movement
-	 * =============================================================================== */
-	 
-	
-	/*
-	always @(posedge clk)
-	begin
-		clk_counter = clk_counter + 1;
-		if (clk_counter == 2000000)
-		begin
-			clk_counter = 0;
-			clk_reduced = ~clk_reduced;		
-		end
-	
-	end
-
-	*/ 
-	always @(posedge clk_50mhz)
-	 begin
-		if (vidon)
-			begin
-			
-				RED[2:0] = RObtenido;
-				GREEN[2:0] = GObtenido;
-				BLUE[1:0] = BObtenido;
-		
-			end
-		else
-			begin
-			
-			RED[2:0] = 3'b000;
-			GREEN[2:0] = 3'b000;
-			BLUE[1:0] = 2'b00;
-		
-			end
-		
-		
-	 end
 	 
 	
 	always @ (posedge clk)
@@ -171,13 +129,11 @@ module maquina_estados(
 					//memoria_m = memoria;
 					mover = 0;
 					LE = 1;
-					clk_counter = clk_counter + 1;
-					if (clk_counter >= 2000000)
+					if (clk_counter >= 2000000) begin
+						cambiarestado = 1;
+					end else if (cambiarestado == 1)
 						begin
-							e_actual = e_siguiente;
-							mover = 1;
-							clk_counter = 0;
-							clk_reduced = ~clk_reduced;
+							cambiarestado = 0;
 						   LE = 0;
 							case(e_actual)
 							
@@ -387,9 +343,58 @@ module maquina_estados(
 				//************ Estado: Defecto*****************//					
 								default: e_siguiente=Inicio;//por defecto est√° en el piso 1
 							endcase
-
+							e_actual = e_siguiente;
+							mover = 1;
 						end
 				end
 		end
+		
+		always @(posedge clk)
+	 begin
+			clk_50mhz = ~clk_50mhz;
+	 end
+	 
+	 
+	/* ===============================================================================
+	 *                          Reduced clock for movement
+	 * =============================================================================== */
+	 
+	
+	
+	always @(posedge clk)
+	begin
+		if (rst) begin
+			clk_counter <= 0;
+		end else if (clk_counter >= 0 && clk_counter < 2000100) begin
+			clk_counter <= clk_counter + 1;
+		end else
+			begin
+				clk_counter <= 0;
+				clk_reduced <= ~clk_reduced;		
+			end
+	end
+
+	 
+	always @(posedge clk_50mhz)
+	 begin
+		if (vidon)
+			begin
+			
+				RED[2:0] = RObtenido;
+				GREEN[2:0] = GObtenido;
+				BLUE[1:0] = BObtenido;
+		
+			end
+		else
+			begin
+			
+			RED[2:0] = 3'b000;
+			GREEN[2:0] = 3'b000;
+			BLUE[1:0] = 2'b00;
+		
+			end
+		
+		
+	 end
 		
 endmodule
