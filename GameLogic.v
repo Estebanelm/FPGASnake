@@ -55,8 +55,8 @@ module GameLogic(
 	 *                                Position variables
 	 * =============================================================================== */
 	
-	reg [11:0] UserCurrentPositionX;
-	reg [11:0] UserCurrentPositionY;
+	reg signed [11:0] UserCurrentPositionX;
+	reg signed [11:0] UserCurrentPositionY;
 	reg movido = 0;
 	
 	
@@ -96,7 +96,7 @@ module GameLogic(
 		begin
 	
 	
-		if (reset == 1)
+		if (reset)
 			begin
 				UserCurrentPositionX = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
 				UserCurrentPositionY = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
@@ -108,42 +108,37 @@ module GameLogic(
 				end else
 					if (movido == 1)
 						begin
-							movido = 0;
-							arriba = UserCurrentPositionY - PLAYER_BOX_WIDTH_HALF;
-							abajo = UserCurrentPositionY + PLAYER_BOX_WIDTH_HALF;
-							izquierda = UserCurrentPositionX - PLAYER_BOX_WIDTH_HALF;
-							derecha = UserCurrentPositionX + PLAYER_BOX_WIDTH_HALF;
-				
-							if (accion == 2 && abajo <= 599) begin
+							movido = 0;				
+							if (accion == 2) begin
 								UserCurrentPositionY = UserCurrentPositionY + PLAYER_BOX_WIDTH;
 							end
 							
-							if (accion == 1 && arriba >= 1) begin
+							if (accion == 1) begin
 								UserCurrentPositionY = UserCurrentPositionY - PLAYER_BOX_WIDTH;
 							end
 							
-							if (accion == 4 && derecha <= 799) begin
+							if (accion == 4) begin
 								UserCurrentPositionX = UserCurrentPositionX + PLAYER_BOX_WIDTH;
 							end
 							
-							if (accion == 3 && izquierda >= 1) begin
+							if (accion == 3) begin
 								UserCurrentPositionX = UserCurrentPositionX - PLAYER_BOX_WIDTH;
 							end
-							/*
+							
 						
-							if ($signed(UserCurrentPositionY) < $signed(0)) begin
-									UserCurrentPositionY = $signed(0);
+							if ($signed(UserCurrentPositionY) < $signed(1)) begin
+									UserCurrentPositionY = $signed(1+PLAYER_BOX_WIDTH_HALF);
 							end
-							if ($signed(UserCurrentPositionY) > $signed(600)) begin
-									UserCurrentPositionY = $signed(600);
+							if ($signed(UserCurrentPositionY) > $signed(599)) begin
+									UserCurrentPositionY = $signed(599-PLAYER_BOX_WIDTH_HALF);
 							end
-							if ($signed(UserCurrentPositionX) < $signed(0)) begin
-									UserCurrentPositionX = $signed(0);
+							if ($signed(UserCurrentPositionX) < $signed(1)) begin
+									UserCurrentPositionX = $signed(1+PLAYER_BOX_WIDTH_HALF);
 							end
-							if ($signed(UserCurrentPositionX) > $signed(800)) begin
-									UserCurrentPositionX = $signed(800);
+							if ($signed(UserCurrentPositionX) > $signed(799)) begin
+									UserCurrentPositionX = $signed(799-PLAYER_BOX_WIDTH_HALF);
 							end
-							*/
+							
 						end
 			end
 	

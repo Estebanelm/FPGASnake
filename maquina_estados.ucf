@@ -30,7 +30,6 @@ NET "derecha" LOC = D9;
 NET "izquierda" LOC = C4;
 NET "pausa" LOC = B8;
 NET "rst" LOC = T10;
-NET "vsync" LOC = P7;
 
 # PlanAhead Generated IO constraints 
 

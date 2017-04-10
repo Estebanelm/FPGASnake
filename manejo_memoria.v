@@ -86,20 +86,33 @@ always @ (posedge clk)
 				begin
 					if (obteniendo == 1)
 						begin
-							indice_encontrado = 7;
 							encontrado = 0;
 							obteniendo = 0;
 							for (contador = 5; contador >= 0; contador = contador - 1)
 								begin
 									if (encontrado == 0)
 										begin
-											if (RAM[contador] == 1 || RAM[contador] == 2 || RAM[contador] == 3 || RAM[contador] == 4 || RAM[contador] == 5)
-												begin
-													memoria = RAM[contador];
-													indice_encontrado = contador;
-													encontrado = 1;
-													RAM[contador] = 0;
-												end
+											if (RAM[contador] == 1) begin
+												RAM[contador] = 0;
+												encontrado = 1;
+												memoria = 1;
+											end else if (RAM[contador] == 2) begin
+												RAM[contador] = 0;
+												encontrado = 1;
+												memoria = 2;
+											end else if (RAM[contador] == 3) begin
+												RAM[contador] = 0;
+												encontrado = 1;
+												memoria = 3;
+											end else if (RAM[contador] == 4) begin
+												RAM[contador] = 0;
+												encontrado = 1;
+												memoria = 4;
+											end else if (RAM[contador] == 5) begin
+												RAM[contador] = 0;
+												encontrado = 1;
+												memoria = 5;
+											end
 										end
 								end
 							if (encontrado == 0)

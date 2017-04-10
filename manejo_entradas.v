@@ -38,8 +38,9 @@ end
 
 always @ (posedge clk)//posedge piso1 or posedge piso2 or posedge piso3 or posedge piso4 or posedge S1 or posedge B2 or posedge S2 or posedge B3 or posedge S3 or posedge B4)
 	begin
-		if (arriba == 0 && abajo == 0 && izquierda == 0 && derecha == 0) begin
+		if (~arriba && ~abajo && ~izquierda && ~derecha && ~pausa) begin
 			nuevoboton = 1;
+			boton_pres = 0;
 		end
 		else if (nuevoboton == 1) begin
 			nuevoboton = 0;

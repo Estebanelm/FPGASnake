@@ -41,7 +41,7 @@ module maquina_estados(
 	reg LE = 1;
 	reg mover = 0;
 	reg cambiarestado = 0;
-	reg [20:0] clk_counter = 21'b0;
+	reg [30:0] clk_counter = 31'b0;
 	reg clk_reduced = 0;
 
 	reg clk_50mhz = 0;
@@ -129,7 +129,7 @@ module maquina_estados(
 					//memoria_m = memoria;
 					mover = 0;
 					LE = 1;
-					if (clk_counter >= 2000000) begin
+					if (clk_counter >= 4000000) begin
 						cambiarestado = 1;
 					end else if (cambiarestado == 1)
 						begin
@@ -365,7 +365,7 @@ module maquina_estados(
 	begin
 		if (rst) begin
 			clk_counter <= 0;
-		end else if (clk_counter >= 0 && clk_counter < 2000100) begin
+		end else if (clk_counter >= 0 && clk_counter < 4000100) begin
 			clk_counter <= clk_counter + 1;
 		end else
 			begin
