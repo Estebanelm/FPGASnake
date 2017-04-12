@@ -10,13 +10,14 @@ module body_stack (
 							input pop
 							);
 							
+	reg [1500:0] ptr;//puntero de la pila
+	reg [2:0] stack [0:1500];
+
+
 	initial begin 
 		ptr = 0;
-		stack = 0;
+		stack[0] = 0;
 	end
-
-	reg signed [11:0] ptr;
-	reg [11:0] stack;
 	
 	always @ (posedge clk)//La idea es que por cada push o pop, sume o reste para saber el indice de la pila
 		begin
@@ -35,12 +36,12 @@ module body_stack (
 		end
 
 
-	always @(posedge clk) begin//este si lo hace, la idea es que en stack[X] la X sea la pos donde va el cuerpo
+	always @(posedge clk) begin//la idea es que en stack[ptr] sea la pos donde va el cuerpo
 		if (push) begin
-			stack[0] <= posEnt;
+			stack[ptr] <= posEnt;
 		end
 		if (pop) begin
-			posSal <= stack[0];//hace que posSal sea la posicion stack[X] con X la siguiente 
+			posSal <= stack[ptr];//hace que posSal sea stack[ptr]
 		end
 	end
 
