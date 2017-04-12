@@ -4,7 +4,7 @@
 // Company: 
 // Engineer:
 //
-// Create Date:   00:36:07 04/12/2017
+// Create Date:   10:35:23 04/12/2017
 // Design Name:   body_stack
 // Module Name:   /media/frander/disk2/Verilog/stack/test.v
 // Project Name:  stack
@@ -33,8 +33,7 @@ module test;
 
 	// Outputs
 	wire [2:0] posSal;
-	wire ptr;
-	wire stack;
+	wire ptr;//lo puse para verificar en la simulación si lo suma o resta
 
 	// Instantiate the Unit Under Test (UUT)
 	body_stack uut (
@@ -55,8 +54,8 @@ module test;
 		pop = 0;
 
 		// Wait 100 ns for global reset to finish
-		#2 reset = 1;
-			//clk = 1;
+		#100
+		reset = 1;
 		
 		#10 posEnt = 1;
 		push = 1;
@@ -72,15 +71,18 @@ module test;
 		#10 push = 0;		
 		#10 pop = 1;
 		#10 pop = 0;
+		#10 posEnt = 1;
+		push = 1;
+		#10 push = 0;		
 		#10 pop = 1;
 		#10 pop = 0;
 
 	end
-            		
+      		
 		always
 		begin
-			#1 clk <=~clk;
+			#10 clk <=~clk;
 		end
-		
+      
 endmodule
 
