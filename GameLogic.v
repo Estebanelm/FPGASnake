@@ -11,9 +11,15 @@ module GameLogic(
 							 input BtnTop,
 							 input BtnBottom,
 							 input [2:0] accion,
+							 input [2:0] Rfruta,
+							 input [2:0] Gfruta,
+							 input [1:0] Bfruta,
+							 input [11:0] fruitPositionX,
+							 input [11:0] fruitPositionY,
 							 output reg [2:0] R,
 							 output reg [2:0] G,
-							 output reg [1:0] B
+							 output reg [1:0] B,
+							 output reg comer
 							 );
 	
 	/* ===============================================================================
@@ -48,6 +54,7 @@ module GameLogic(
 			abajo = UserCurrentPositionY + PLAYER_BOX_WIDTH_HALF;
 			izquierda = UserCurrentPositionX - PLAYER_BOX_WIDTH_HALF;
 			derecha = UserCurrentPositionX + PLAYER_BOX_WIDTH_HALF;
+			comer = 0;
 	end
 	
 	
@@ -105,6 +112,7 @@ module GameLogic(
 			begin
 				if (mover == 0) begin
 					movido = 1;
+					comer = 0;
 				end else
 					if (movido == 1)
 						begin
@@ -127,18 +135,21 @@ module GameLogic(
 							
 						
 							if ($signed(UserCurrentPositionY) < $signed(1)) begin
-									UserCurrentPositionY = $signed(1+PLAYER_BOX_WIDTH_HALF);
+									UserCurrentPositionY = $signed(0+PLAYER_BOX_WIDTH_HALF);
 							end
 							if ($signed(UserCurrentPositionY) > $signed(599)) begin
-									UserCurrentPositionY = $signed(599-PLAYER_BOX_WIDTH_HALF);
+									UserCurrentPositionY = $signed(600-PLAYER_BOX_WIDTH_HALF);
 							end
 							if ($signed(UserCurrentPositionX) < $signed(1)) begin
-									UserCurrentPositionX = $signed(1+PLAYER_BOX_WIDTH_HALF);
+									UserCurrentPositionX = $signed(0+PLAYER_BOX_WIDTH_HALF);
 							end
 							if ($signed(UserCurrentPositionX) > $signed(799)) begin
-									UserCurrentPositionX = $signed(799-PLAYER_BOX_WIDTH_HALF);
+									UserCurrentPositionX = $signed(800-PLAYER_BOX_WIDTH_HALF);
 							end
 							
+							if (UserCurrentPositionX == fruitPositionX && UserCurrentPositionY == fruitPositionY) begin
+									comer = 1;
+							end
 						end
 			end
 	
@@ -161,6 +172,15 @@ module GameLogic(
 			R[2:0] = 3'b000;
 			G[2:0] = 3'b000;
 			B[1:0] = 2'b11;
+		end
+		else if (PixelX >= (fruitPositionX - PLAYER_BOX_WIDTH_HALF) &&
+			 PixelX <= (fruitPositionX + PLAYER_BOX_WIDTH_HALF) &&
+			 PixelY >= (fruitPositionY - PLAYER_BOX_WIDTH_HALF) &&
+			 PixelY <= (fruitPositionY + PLAYER_BOX_WIDTH_HALF))
+		begin
+			R[2:0] = Rfruta;
+			G[2:0] = Gfruta;
+			B[1:0] = Bfruta;
 		end
 		else
 		begin

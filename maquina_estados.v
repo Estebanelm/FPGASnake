@@ -56,8 +56,16 @@ module maquina_estados(
 	wire [2:0] GObtenido;
 	wire [1:0] BObtenido;
 	
+	wire [11:0] fruitPositionX;
+	wire [11:0] fruitPositionY;
+	wire [2:0] Rfruta;
+	wire [2:0] Gfruta;
+	wire [1:0] Bfruta;
+	wire comer;
+	
 	assign hsync = ~hsync_out;
 	assign vsync = ~vsync_out;
+	
 	
 	manejo_entradas entradas(
 	clk,
@@ -101,11 +109,27 @@ module maquina_estados(
 	 arriba,
 	 abajo,
 	 accion,
+	 Rfruta,
+	 Gfruta,
+	 Bfruta,
+	 fruitPositionX,
+	 fruitPositionY,
 	 RObtenido,
 	 GObtenido,
-	 BObtenido
+	 BObtenido,
+	 comer
 	 );
 	 
+	 fruta Comida(
+	 clk,
+	 comer,
+	 rst,
+	 fruitPositionX,
+	 fruitPositionY,
+	 Rfruta,
+	 Gfruta,
+	 Bfruta
+	 );
 	 
 	 initial
 	 begin
