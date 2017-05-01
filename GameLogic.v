@@ -5,7 +5,7 @@ module GameLogic(
 							 input mover,
 							 input [10:0] PixelX,
 							 input [10:0] PixelY,
-							 input reset,
+							 input rst,
 							 input BtnLeft,
 							 input BtnRight,
 							 input BtnTop,
@@ -19,7 +19,8 @@ module GameLogic(
 							 output reg [2:0] R,
 							 output reg [2:0] G,
 							 output reg [1:0] B,
-							 output reg comer
+							 output reg comer,
+							 output reg reset
 							 );
 	
 	/* ===============================================================================
@@ -55,6 +56,7 @@ module GameLogic(
 			izquierda = UserCurrentPositionX - PLAYER_BOX_WIDTH_HALF;
 			derecha = UserCurrentPositionX + PLAYER_BOX_WIDTH_HALF;
 			comer = 0;
+			reset = 0;
 	end
 	
 	
@@ -103,16 +105,19 @@ module GameLogic(
 		begin
 	
 	
-		if (reset)
+		if (rst)
 			begin
 				UserCurrentPositionX = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
 				UserCurrentPositionY = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
+				reset = 1;
 			end
 		else
 			begin
+				reset = 0;
 				if (mover == 0) begin
 					movido = 1;
 					comer = 0;
+					reset = 0;
 				end else
 					if (movido == 1)
 						begin
@@ -135,16 +140,29 @@ module GameLogic(
 							
 						
 							if ($signed(UserCurrentPositionY) < $signed(1)) begin
-									UserCurrentPositionY = $signed(0+PLAYER_BOX_WIDTH_HALF);
+									//UserCurrentPositionY = $signed(0+PLAYER_BOX_WIDTH_HALF);
+									reset = 1;
+									UserCurrentPositionX = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
+									UserCurrentPositionY = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
 							end
 							if ($signed(UserCurrentPositionY) > $signed(599)) begin
-									UserCurrentPositionY = $signed(600-PLAYER_BOX_WIDTH_HALF);
+									//UserCurrentPositionY = $signed(600-PLAYER_BOX_WIDTH_HALF);
+									reset = 1;
+									UserCurrentPositionX = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
+									UserCurrentPositionY = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
 							end
 							if ($signed(UserCurrentPositionX) < $signed(1)) begin
-									UserCurrentPositionX = $signed(0+PLAYER_BOX_WIDTH_HALF);
+									//UserCurrentPositionX = $signed(0+PLAYER_BOX_WIDTH_HALF);
+									reset = 1;
+									UserCurrentPositionX = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
+									UserCurrentPositionY = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
+									
 							end
 							if ($signed(UserCurrentPositionX) > $signed(799)) begin
-									UserCurrentPositionX = $signed(800-PLAYER_BOX_WIDTH_HALF);
+									//UserCurrentPositionX = $signed(800-PLAYER_BOX_WIDTH_HALF);
+									reset = 1;
+									UserCurrentPositionX = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
+									UserCurrentPositionY = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
 							end
 							
 							if (UserCurrentPositionX == fruitPositionX && UserCurrentPositionY == fruitPositionY) begin

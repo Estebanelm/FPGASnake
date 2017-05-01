@@ -63,6 +63,8 @@ module maquina_estados(
 	wire [1:0] Bfruta;
 	wire comer;
 	
+	wire reset;
+	
 	assign hsync = ~hsync_out;
 	assign vsync = ~vsync_out;
 	
@@ -79,7 +81,7 @@ module maquina_estados(
 	 
 	manejo_memoria memoria_movimiento(
    clk,
-	rst,
+	reset,
 	LE,
 	boton_pres, //boton que se presiona
 	memoria //registro con la siguiente instruccion para la maquina de estados
@@ -88,7 +90,7 @@ module maquina_estados(
 	 
 	 vga_800x600 controlador(
 	 .clk(clk_50mhz),
-	 .clr(rst),
+	 .clr(reset),
 	 .hsync(hsync_out),
 	 .vsync(vsync_out),
 	 .PixelX(PixelX),
@@ -117,13 +119,14 @@ module maquina_estados(
 	 RObtenido,
 	 GObtenido,
 	 BObtenido,
-	 comer
+	 comer,
+	 reset
 	 );
 	 
 	 fruta Comida(
 	 clk,
 	 comer,
-	 rst,
+	 reset,
 	 fruitPositionX,
 	 fruitPositionY,
 	 Rfruta,
@@ -143,7 +146,7 @@ module maquina_estados(
 	
 	always @ (posedge clk)
 	   begin
-			if(rst == 1)
+			if(reset == 1)
 			   begin
 				   e_actual = Inicio;
 					LE = 1;
@@ -387,7 +390,7 @@ module maquina_estados(
 	
 	always @(posedge clk)
 	begin
-		if (rst) begin
+		if (reset) begin
 			clk_counter <= 0;
 		end else if (clk_counter >= 0 && clk_counter < 4000100) begin
 			clk_counter <= clk_counter + 1;
