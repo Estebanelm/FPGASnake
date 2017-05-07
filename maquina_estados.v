@@ -41,7 +41,7 @@ module maquina_estados(
 	reg LE = 1;
 	reg mover = 0;
 	reg cambiarestado = 0;
-	reg [30:0] clk_counter = 31'b0;
+	reg [24:0] clk_counter = 25'b0;
 	reg clk_reduced = 0;
 
 	reg clk_50mhz = 0;
@@ -55,15 +55,11 @@ module maquina_estados(
 	wire [2:0] RObtenido;
 	wire [2:0] GObtenido;
 	wire [1:0] BObtenido;
-	
-	wire [11:0] fruitPositionX;
-	wire [11:0] fruitPositionY;
-	wire [2:0] Rfruta;
-	wire [2:0] Gfruta;
-	wire [1:0] Bfruta;
-	wire comer;
-	
+		
 	wire reset;
+	
+	wire [11:0] posColaX;
+	wire [11:0] posColaY;
 	
 	assign hsync = ~hsync_out;
 	assign vsync = ~vsync_out;
@@ -101,39 +97,18 @@ module maquina_estados(
 	
 	 GameLogic pintador(
 	 clk,
-	 clk_reduced,
+	 clk_50mhz,
 	 mover,
 	 PixelX,
 	 PixelY,
 	 rst,
-	 izquierda,
-	 derecha,
-	 arriba,
-	 abajo,
 	 accion,
-	 Rfruta,
-	 Gfruta,
-	 Bfruta,
-	 fruitPositionX,
-	 fruitPositionY,
 	 RObtenido,
 	 GObtenido,
 	 BObtenido,
-	 comer,
 	 reset
 	 );
-	 
-	 fruta Comida(
-	 clk,
-	 comer,
-	 reset,
-	 fruitPositionX,
-	 fruitPositionY,
-	 Rfruta,
-	 Gfruta,
-	 Bfruta
-	 );
-	 
+	 	 
 	 initial
 	 begin
 		RED[2:0] = 3'b000;

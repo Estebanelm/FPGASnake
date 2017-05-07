@@ -22,8 +22,8 @@ module fruta(
 	input clk,
 	input comer,
 	input rst,
-	output reg [11:0] fruitPositionX,
-	output reg [11:0] fruitPositionY,
+	output reg [10:0] fruitPositionX,
+	output reg [10:0] fruitPositionY,
 	output reg [2:0] Rfruta,
 	output reg [2:0] Gfruta,
 	output reg [1:0] Bfruta
@@ -33,8 +33,8 @@ parameter FRUIT_BOX_WIDTH		  	= 10;
 parameter Number_of_locationsX	= 80;
 parameter Number_of_locationsY	= 60;
 
-reg [11:0] randomX = 20;
-reg [11:0] randomY = 20;
+reg [10:0] randomX = 20;
+reg [10:0] randomY = 1;
 
 reg[6:0] posicionesX = 5;
 reg[5:0] posicionesY = 5;

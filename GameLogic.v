@@ -6,20 +6,10 @@ module GameLogic(
 							 input [10:0] PixelX,
 							 input [10:0] PixelY,
 							 input rst,
-							 input BtnLeft,
-							 input BtnRight,
-							 input BtnTop,
-							 input BtnBottom,
 							 input [2:0] accion,
-							 input [2:0] Rfruta,
-							 input [2:0] Gfruta,
-							 input [1:0] Bfruta,
-							 input [11:0] fruitPositionX,
-							 input [11:0] fruitPositionY,
 							 output reg [2:0] R,
 							 output reg [2:0] G,
 							 output reg [1:0] B,
-							 output reg comer,
 							 output reg reset
 							 );
 	
@@ -32,17 +22,32 @@ module GameLogic(
 	parameter INITIAL_START_POS_X 	= 40;
 	parameter INITIAL_START_POS_Y 	= 40;
 	
-	reg arriba;
-	reg abajo;
-	reg derecha;
-	reg izquierda;
+	wire [10:0] fruitPositionX;
+	wire [10:0] fruitPositionY;
+	wire [2:0] Rfruta;
+	wire [2:0] Gfruta;
+	wire [1:0] Bfruta;
+	reg comer;
 	
+	integer contador25;
+	integer i;
+	reg obtener;
 	
-	/* ===============================================================================
-	 *                              Level selector
-	 * =============================================================================== */
+	wire [10:0] posColaX;
+	wire [10:0] posColaY;
+
+	reg [10:0] stackX [0:25];
+	reg [10:0] stackY [0:25];
 	
-	//reg [3:0] CurrentLevel;	
+	reg signed [10:0] UserCurrentPositionX;
+	reg signed [10:0] UserCurrentPositionY;
+	reg signed [10:0] UserCurrentPositionXanterior;
+	reg signed [10:0] UserCurrentPositionYanterior;
+
+	reg movido = 0;
+	reg estaCola;
+	
+	integer ptr;
 	
 	/* ===============================================================================
 	 *                          Initial register values
@@ -51,23 +56,49 @@ module GameLogic(
 	initial begin
 			UserCurrentPositionX = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
 			UserCurrentPositionY = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
-			arriba = UserCurrentPositionY - PLAYER_BOX_WIDTH_HALF;
-			abajo = UserCurrentPositionY + PLAYER_BOX_WIDTH_HALF;
-			izquierda = UserCurrentPositionX - PLAYER_BOX_WIDTH_HALF;
-			derecha = UserCurrentPositionX + PLAYER_BOX_WIDTH_HALF;
+			UserCurrentPositionXanterior = 0;
+			UserCurrentPositionYanterior = 0;
 			comer = 0;
 			reset = 0;
+			obtener = 0;
+			i = 0;
+			estaCola = 0;
+			ptr <= -1;
+			for ( i = 0; i<=25; i = i + 1)
+				begin
+					stackX[i] = 0;
+					stackY[i] = 0;
+				end
 	end
 	
-	
 	/* ===============================================================================
-	 *                                Position variables
+	 *                                   Modules
 	 * =============================================================================== */
+	 
+	 fruta Comida(
+	 uclk,
+	 comer,
+	 reset,
+	 fruitPositionX,
+	 fruitPositionY,
+	 Rfruta,
+	 Gfruta,
+	 Bfruta
+	 );
+/*
+	 body_stack Cola(
+	 uclk,
+	 reset,
+	 UserCurrentPositionXant,
+	 UserCurrentPositionYant,
+	 posColaX,
+	 posColaY,
+	 push,
+	 pop,
+	 obtener
+	 );
 	
-	reg signed [11:0] UserCurrentPositionX;
-	reg signed [11:0] UserCurrentPositionY;
-	reg movido = 0;
-	
+	*/
 	
 	/* ===============================================================================
 	 *                                Collision Detection
@@ -110,6 +141,12 @@ module GameLogic(
 				UserCurrentPositionX = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
 				UserCurrentPositionY = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
 				reset = 1;
+				ptr <= -1;
+				for ( i = 0; i < 26; i = i + 1)
+					begin
+						stackX[i] = 11'b0;
+						stackY[i] = 11'b0;
+					end
 			end
 		else
 			begin
@@ -121,20 +158,60 @@ module GameLogic(
 				end else
 					if (movido == 1)
 						begin
-							movido = 0;				
+							movido = 0;
+							begin
+								if (UserCurrentPositionX == fruitPositionX && UserCurrentPositionY == fruitPositionY) 
+									begin
+										comer = 1;
+										if (ptr == 25)
+											ptr <= 25;
+										else
+											begin
+												ptr <= ptr + 1;
+												stackX[ptr] = UserCurrentPositionX;
+												stackY[ptr] = UserCurrentPositionY;
+
+											end
+									end
+								else
+									begin
+										begin
+											for (i = 0; i < 26; i = i + 1)
+												begin
+													if (i==25)	begin
+														stackX[i]=0;
+														stackY[i]=0;
+													end else
+														begin
+															stackX[i]=stackX[i+1];
+															stackY[i]=stackY[i+1];
+														end 
+												end
+										end
+										if (ptr >= 0)
+											begin
+												stackX[ptr] = UserCurrentPositionX;
+												stackY[ptr] = UserCurrentPositionY;
+											end
+									end
+							end	
 							if (accion == 2) begin
+								UserCurrentPositionYanterior = UserCurrentPositionY;
 								UserCurrentPositionY = UserCurrentPositionY + PLAYER_BOX_WIDTH;
 							end
 							
 							if (accion == 1) begin
+								UserCurrentPositionYanterior = UserCurrentPositionY;
 								UserCurrentPositionY = UserCurrentPositionY - PLAYER_BOX_WIDTH;
 							end
 							
 							if (accion == 4) begin
+								UserCurrentPositionXanterior = UserCurrentPositionX;
 								UserCurrentPositionX = UserCurrentPositionX + PLAYER_BOX_WIDTH;
 							end
 							
 							if (accion == 3) begin
+								UserCurrentPositionXanterior = UserCurrentPositionX;
 								UserCurrentPositionX = UserCurrentPositionX - PLAYER_BOX_WIDTH;
 							end
 							
@@ -142,18 +219,36 @@ module GameLogic(
 							if ($signed(UserCurrentPositionY) < $signed(1)) begin
 									//UserCurrentPositionY = $signed(0+PLAYER_BOX_WIDTH_HALF);
 									reset = 1;
+									ptr <= -1;
+									for ( i = 0; i<26; i = i + 1)
+										begin
+											stackX[i] = 0;
+											stackY[i] = 0;
+										end
 									UserCurrentPositionX = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
 									UserCurrentPositionY = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
 							end
 							if ($signed(UserCurrentPositionY) > $signed(599)) begin
 									//UserCurrentPositionY = $signed(600-PLAYER_BOX_WIDTH_HALF);
 									reset = 1;
+									ptr <= -1;
+									for ( i = 0; i<26; i = i + 1)
+										begin
+											stackX[i] = 0;
+											stackY[i] = 0;
+										end
 									UserCurrentPositionX = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
 									UserCurrentPositionY = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
 							end
 							if ($signed(UserCurrentPositionX) < $signed(1)) begin
 									//UserCurrentPositionX = $signed(0+PLAYER_BOX_WIDTH_HALF);
 									reset = 1;
+									ptr <= -1;
+									for ( i = 0; i<26; i = i + 1)
+										begin
+											stackX[i] = 0;
+											stackY[i] = 0;
+										end
 									UserCurrentPositionX = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
 									UserCurrentPositionY = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
 									
@@ -161,27 +256,55 @@ module GameLogic(
 							if ($signed(UserCurrentPositionX) > $signed(799)) begin
 									//UserCurrentPositionX = $signed(800-PLAYER_BOX_WIDTH_HALF);
 									reset = 1;
+									ptr <= -1;
+									for ( i = 0; i<26; i = i + 1)
+										begin
+											stackX[i] = 0;
+											stackY[i] = 0;
+										end
 									UserCurrentPositionX = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
 									UserCurrentPositionY = INITIAL_START_POS_X + PLAYER_BOX_WIDTH_HALF;
 							end
 							
-							if (UserCurrentPositionX == fruitPositionX && UserCurrentPositionY == fruitPositionY) begin
-									comer = 1;
-							end
+
+
 						end
 			end
 	
 	
 	end
-	
+	/*
+	always @(posedge uclk)
+	begin
+		if (mover == 0)
+			begin
+				if (obtener == 0)
+					begin
+						contador25 =0;
+						obtener = 0;
+					end
+			end
+		else
+			begin
+				if (contador25 <= 25)
+					begin
+						obtener = 1;
+						stackX [contador25] = posColaX;
+						stackY [contador25] = posColaY;
+						contador25 = contador25 + 1;
+					end
+				else
+					obtener = 0;
+			end
+	end
+	*/
 	
 	/* ===============================================================================
 	 *                          Graphics output 
 	 * =============================================================================== */
 	
-	always @(posedge uclk)
+	always @(posedge clk_reduced)
 	begin
-		
 		if (PixelX >= (UserCurrentPositionX - PLAYER_BOX_WIDTH_HALF) &&
 			 PixelX <= (UserCurrentPositionX + PLAYER_BOX_WIDTH_HALF) &&
 			 PixelY >= (UserCurrentPositionY - PLAYER_BOX_WIDTH_HALF) &&
@@ -202,9 +325,36 @@ module GameLogic(
 		end
 		else
 		begin
-			R[2:0] = 3'b111;
-			G[2:0] = 3'b111;
-			B[1:0] = 2'b11;
+			estaCola = 0;
+			for ( i = 25; i >= 0 ; i = i - 1)
+				begin
+					if (PixelX >= (stackX[i] - PLAYER_BOX_WIDTH_HALF) &&
+						 PixelX <= (stackX[i] + PLAYER_BOX_WIDTH_HALF) &&
+						 PixelY >= (stackY[i] - PLAYER_BOX_WIDTH_HALF) &&
+						 PixelY <= (stackY[i] + PLAYER_BOX_WIDTH_HALF))
+						 if (stackX[i] > 0 || stackY[i] > 0)
+							begin
+								if (!estaCola)
+									begin
+										estaCola = 1;
+										R[2:0] = 3'b000;
+										G[2:0] = 3'b000;
+										B[1:0] = 2'b11;
+									end
+							end
+						 else
+							begin
+								R[2:0] = 3'b111;
+								G[2:0] = 3'b111;
+								B[1:0] = 2'b11;
+							end
+					else begin
+						R[2:0] = 3'b111;
+						G[2:0] = 3'b111;
+						B[1:0] = 2'b11;
+						end
+
+				end
 		end
 		
 	end											
