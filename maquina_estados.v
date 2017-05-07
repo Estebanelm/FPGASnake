@@ -3,11 +3,6 @@
 
 
 module maquina_estados(
-	 //0: no hay ningún input
-	 //1: arriba
-	 //2: abajo
-	 //3: izquierda
-	 //4: derecha
 	 input clk, //clock
 	 input rst, //reset
 	 input arriba,
@@ -34,9 +29,8 @@ module maquina_estados(
 	wire [2:0] memoria; //registro con la siguiente instruccion para la maquina de estados
 
 	wire [2:0] boton_pres; //entradas donde se guardan todos los botones de los pisos
-	//accion //0: nada, 1: arriba, 2: abajo, 3: izquierda, 4: derecha
-		
-	//assign boton_pres1 = boton_pres;
+	//accion //0: pausa, 1: arriba, 2: abajo, 3: izquierda, 4: derecha
+
 	
 	reg LE = 1;
 	reg mover = 0;
@@ -128,10 +122,9 @@ module maquina_estados(
 				end
 			else			
 				begin
-					//memoria_m = memoria;
 					mover = 0;
 					LE = 1;
-					if (clk_counter >= 4000000) begin
+					if (clk_counter >= 6000000) begin
 						cambiarestado = 1;
 					end else if (cambiarestado == 1)
 						begin
@@ -362,12 +355,12 @@ module maquina_estados(
 	 * =============================================================================== */
 	 
 	
-	
+	//reloj que controla la velocidad de la serpiente
 	always @(posedge clk)
 	begin
 		if (reset) begin
 			clk_counter <= 0;
-		end else if (clk_counter >= 0 && clk_counter < 4000100) begin
+		end else if (clk_counter >= 0 && clk_counter < 6000100) begin
 			clk_counter <= clk_counter + 1;
 		end else
 			begin
