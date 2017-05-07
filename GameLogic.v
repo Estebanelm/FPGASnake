@@ -328,13 +328,14 @@ module GameLogic(
 			estaCola = 0;
 			for ( i = 25; i >= 0 ; i = i - 1)
 				begin
-					if (PixelX >= (stackX[i] - PLAYER_BOX_WIDTH_HALF) &&
-						 PixelX <= (stackX[i] + PLAYER_BOX_WIDTH_HALF) &&
-						 PixelY >= (stackY[i] - PLAYER_BOX_WIDTH_HALF) &&
-						 PixelY <= (stackY[i] + PLAYER_BOX_WIDTH_HALF))
-						 if (stackX[i] > 0 || stackY[i] > 0)
+					if (estaCola == 0)
+						begin
+						if (PixelX >= (stackX[i] - PLAYER_BOX_WIDTH_HALF) &&
+							 PixelX <= (stackX[i] + PLAYER_BOX_WIDTH_HALF) &&
+							 PixelY >= (stackY[i] - PLAYER_BOX_WIDTH_HALF) &&
+							 PixelY <= (stackY[i] + PLAYER_BOX_WIDTH_HALF))
 							begin
-								if (!estaCola)
+								if (stackX[i] > 0 || stackY[i] > 0)
 									begin
 										estaCola = 1;
 										R[2:0] = 3'b000;
@@ -342,18 +343,13 @@ module GameLogic(
 										B[1:0] = 2'b11;
 									end
 							end
-						 else
-							begin
-								R[2:0] = 3'b111;
-								G[2:0] = 3'b111;
-								B[1:0] = 2'b11;
-							end
-					else begin
-						R[2:0] = 3'b111;
-						G[2:0] = 3'b111;
-						B[1:0] = 2'b11;
-						end
-
+						 end
+				end
+			if (estaCola == 0)
+				begin
+					R[2:0] = 3'b111;
+					G[2:0] = 3'b111;
+					B[1:0] = 2'b11;
 				end
 		end
 		
